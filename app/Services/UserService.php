@@ -20,4 +20,17 @@ class UserService
 
         return $this->userRepository->create($input);
     }
+
+    public function findForLogin(array $credentials): ?User
+    {
+        if (! empty($credentials['email'])) {
+            return $this->userRepository->findEmail($credentials['email']);
+        }
+
+        if (! empty($credentials['username'])) {
+            return $this->userRepository->findUsername($credentials['username']);
+        }
+
+        return null;
+    }
 }
