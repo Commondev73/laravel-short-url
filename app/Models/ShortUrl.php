@@ -3,21 +3,27 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
-use Illuminate\Database\Eloquent\Attributes\Hidden;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
 
-#[Fillable(['user_id', 'token_hash', 'expires_at', 'revoked_at'])]
-#[Hidden(['token_hash'])]
-class RefreshToken extends Model
+#[Fillable([
+    'user_id',
+    'original_url',
+    'short_code',
+    'title',
+    'click_count',
+    'is_active',
+    'expires_at',
+])]
+class ShortUrl extends Model
 {
     protected function casts(): array
     {
         return [
+            'click_count' => 'integer',
+            'is_active' => 'boolean',
             'expires_at' => 'datetime',
-            'revoked_at' => 'datetime',
         ];
     }
 
@@ -31,19 +37,14 @@ class RefreshToken extends Model
         $expiresAt = $this->expires_at;
 
         if (! $expiresAt instanceof Carbon) {
-            return true;
+            return false;
         }
 
         return $expiresAt->isPast();
     }
 
-    public function isRevoked(): bool
+    public function isAccessible(): bool
     {
-        return $this->revoked_at !== null;
-    }
-
-    public function isActive(): bool
-    {
-        return ! $this->isExpired() && ! $this->isRevoked();
+        return $this->is_active && ! $this->isExpired();
     }
 }

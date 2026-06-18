@@ -1,7 +1,7 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
     "name": "laravel/short-url",
-    "version": "1.0.0",
+    "version": "1.1.0",
     "type": "project",
     "description": "Short URL application for Laravel framework.",
     "keywords": [
@@ -15,6 +15,7 @@
         "dedoc/scramble": "^0.13.28",
         "laravel/framework": "^13.8",
         "laravel/tinker": "^3.0",
+        "predis/predis": "^3.5",
         "tymon/jwt-auth": "^2.3"
     },
     "require-dev": {
