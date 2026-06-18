@@ -42,6 +42,10 @@ return [
             'driver' => 'session',
             'provider' => 'users',
         ],
+        'api' => [
+            'driver' => 'jwt',
+            'provider' => 'users',
+        ],
     ],
 
     /*
@@ -114,4 +118,15 @@ return [
 
     'password_timeout' => env('AUTH_PASSWORD_TIMEOUT', 10800),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Refresh Token Hash Key
+    |--------------------------------------------------------------------------
+    |
+    | This key is used to HMAC-hash refresh tokens before storage. Keep it
+    | secret and do not change it without revoking all existing refresh tokens.
+    |
+    */
+
+    'refresh_token_hash_key' => env('REFRESH_TOKEN_HASH_KEY', env('APP_KEY')),
 ];
