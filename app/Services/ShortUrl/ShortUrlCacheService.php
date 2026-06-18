@@ -20,31 +20,45 @@ class ShortUrlCacheService
 
     public function rememberByShortCode(string $shortCode, Closure $callback): ?ShortUrl
     {
-        return $this->cache->remember(
+        $data = $this->cache->remember(
             self::KEY_PREFIX_CODE . $shortCode,
             self::TTL_SECONDS,
             $callback
         );
+
+        return $this->hydrate($data);
     }
 
     public function rememberById(int $id, Closure $callback): ?ShortUrl
     {
-        return $this->cache->remember(
+        $data = $this->cache->remember(
             self::KEY_PREFIX_ID . $id,
             self::TTL_SECONDS,
             $callback
         );
+
+        return $this->hydrate($data);
     }
 
     public function set(ShortUrl $shortUrl): void
     {
-        $this->cache->set(self::KEY_PREFIX_CODE . $shortUrl->short_code, $shortUrl, self::TTL_SECONDS);
-        $this->cache->set(self::KEY_PREFIX_ID . $shortUrl->id, $shortUrl, self::TTL_SECONDS);
+        $data = $shortUrl->toArray();
+        $this->cache->set(self::KEY_PREFIX_CODE . $shortUrl->short_code, $data, self::TTL_SECONDS);
+        $this->cache->set(self::KEY_PREFIX_ID . $shortUrl->id, $data, self::TTL_SECONDS);
     }
-
+    
     public function forget(ShortUrl $shortUrl): void
     {
         $this->cache->forget(self::KEY_PREFIX_CODE . $shortUrl->short_code);
         $this->cache->forget(self::KEY_PREFIX_ID . $shortUrl->id);
+    }
+
+    private function hydrate(?array $data): ?ShortUrl
+    {
+        if ($data === null) {
+            return null;
+        }
+
+        return ShortUrl::hydrate([$data])->first();
     }
 }

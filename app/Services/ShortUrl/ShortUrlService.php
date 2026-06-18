@@ -41,7 +41,7 @@ class ShortUrlService
     {
         $shortUrl = $this->cache->rememberById(
             $id,
-            fn () => $this->shortUrlRepository->findById($id)
+            fn () => $this->shortUrlRepository->findById($id)?->toArray()
         );
 
         if ($shortUrl === null) {
@@ -55,7 +55,7 @@ class ShortUrlService
     {
         $shortUrl = $this->cache->rememberByShortCode(
             $shortCode,
-            fn () => $this->shortUrlRepository->findByShortCode($shortCode)
+            fn () => $this->shortUrlRepository->findByShortCode($shortCode)?->toArray()
         );
 
         if ($shortUrl === null || ! $shortUrl->isAccessible()) {
