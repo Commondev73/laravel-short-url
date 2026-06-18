@@ -26,13 +26,6 @@ class RefreshToken extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function scopeActive(Builder $query): Builder
-    {
-        return $query
-            ->whereNull('revoked_at')
-            ->where('expires_at', '>', now());
-    }
-
     public function isExpired(): bool
     {
         $expiresAt = $this->expires_at;
