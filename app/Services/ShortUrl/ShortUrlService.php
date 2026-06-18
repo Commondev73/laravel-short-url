@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\ShortUrl;
 
 use App\Models\ShortUrl;
 use App\Repositories\Interfaces\ShortUrlRepositoryInterface;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Str;
-use Illuminate\Validation\ValidationException;
 use RuntimeException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use UnauthorizedException;
 
 class ShortUrlService
 {
@@ -19,7 +19,8 @@ class ShortUrlService
     private const DEFAULT_EXPIRATION_DAYS = 30;
 
     public function __construct(
-        private ShortUrlRepositoryInterface $shortUrlRepository
+        private ShortUrlRepositoryInterface $shortUrlRepository,
+        private ShortUrlCacheService $cache
     ) {}
 
     public function create(int $userId, array $input): ShortUrl
@@ -32,13 +33,16 @@ class ShortUrlService
             'is_active' => $input['is_active'] ?? true,
             'expires_at' => $input['expires_at'] ?? now()->addDays(self::DEFAULT_EXPIRATION_DAYS),
         ];
-        
+
         return $this->shortUrlRepository->create($data);
     }
 
     public function findById(int $id): ShortUrl
     {
-        $shortUrl = $this->shortUrlRepository->findById($id);
+        $shortUrl = $this->cache->rememberById(
+            $id,
+            fn () => $this->shortUrlRepository->findById($id)
+        );
 
         if ($shortUrl === null) {
             throw new NotFoundHttpException('Short URL not found.');
@@ -49,10 +53,13 @@ class ShortUrlService
 
     public function findByShortCode(string $shortCode): ShortUrl
     {
-        $shortUrl = $this->shortUrlRepository->findByShortCode($shortCode);
+        $shortUrl = $this->cache->rememberByShortCode(
+            $shortCode,
+            fn () => $this->shortUrlRepository->findByShortCode($shortCode)
+        );
 
-        if ($shortUrl === null) {
-            throw new NotFoundHttpException('Short URL not found.');
+        if ($shortUrl === null || ! $shortUrl->isAccessible()) {
+            throw new NotFoundHttpException('Short URL not found or inaccessible.');
         }
 
         return $shortUrl;
@@ -77,20 +84,16 @@ class ShortUrlService
             throw new UnauthorizedException('You are not authorized to update this short URL.');
         }
 
-        return $this->shortUrlRepository->update($id, $input);
+        $updated = $this->shortUrlRepository->update($id, $input);
+
+        $this->cache->forget($updated);
+
+        return $updated;
     }
 
-    public function clickCount(string $shortCode): ?ShortUrl
+    public function clickCount(int $id): void
     {
-        $shortUrl = $this->shortUrlRepository->findByShortCode($shortCode);
-
-        if ($shortUrl === null || ! $shortUrl->isAccessible()) {
-            return null;
-        }
-
-        $this->shortUrlRepository->incrementClickCount($shortUrl->id);
-
-        return $shortUrl;
+        $this->shortUrlRepository->incrementClickCount($id);
     }
 
     private function generateUniqueShortCode(): string
