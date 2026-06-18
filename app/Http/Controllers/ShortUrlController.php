@@ -19,14 +19,11 @@ class ShortUrlController extends Controller
     public function index(Request $request): JsonResponse
     {
         $userId = (int) auth('api')->id();
-        $perPage = $request->integer('per_page', 15)
+        $perPage = $request->integer('per_page', 15);
 
         $shortUrls = $this->shortUrlService->paginateByUserId($userId, $perPage);
 
-        return response()->json([
-            'message' => 'Short URLs fetched successfully.',
-            'data' => $shortUrls,
-        ]);
+        return $this->paginated($shortUrls, 'Short URLs fetched successfully.');
     }
 
     public function store(StoreShortUrlRequest $request): JsonResponse
@@ -34,10 +31,7 @@ class ShortUrlController extends Controller
         $userId = (int) auth('api')->id();
         $shortUrl = $this->shortUrlService->create($userId, $request->validated());
 
-        return response()->json([
-            'message' => 'Short URL created successfully.',
-            'data' => $shortUrl,
-        ], 201);
+        return $this->created($shortUrl, 'Short URL created successfully.');
     }
 
     public function update(UpdateShortUrlRequest $request, int $id): JsonResponse
@@ -45,15 +39,17 @@ class ShortUrlController extends Controller
         $userId = (int) auth('api')->id();
         $shortUrl = $this->shortUrlService->update($id, $userId, $request->validated());
 
-        return response()->json([
-            'message' => 'Short URL updated successfully.',
-            'data' => $shortUrl,
-        ]);
+        return $this->success($shortUrl, 'Short URL updated successfully.');
     }
 
     public function redirect(string $shortCode): RedirectResponse
     {
         $shortUrl = $this->shortUrlService->clickCount($shortCode);
+
+        if ($shortUrl === null) {
+            throw new NotFoundHttpException('Short URL not found or inaccessible.');
+        }
+
         return redirect()->away($shortUrl->original_url);
     }
 }

@@ -3,7 +3,12 @@
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Auth\AuthenticationException;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
+use Throwable;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -19,4 +24,53 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->shouldRenderJsonWhen(
             fn (Request $request) => $request->is('api/*'),
         );
+
+        $exceptions->render(function (Throwable $exception, Request $request) {
+            if (! $request->is('api/*')) {
+                return null;
+            }
+
+            if ($exception instanceof ValidationException) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Validation failed.',
+                    'errors' => $exception->errors(),
+                    'data' => null,
+                ], 422);
+            }
+
+            if ($exception instanceof AuthenticationException) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Unauthenticated.',
+                    'errors' => null,
+                    'data' => null,
+                ], 401);
+            }
+
+            if ($exception instanceof AuthorizationException) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Forbidden.',
+                    'errors' => null,
+                    'data' => null,
+                ], 403);
+            }
+
+            if ($exception instanceof HttpExceptionInterface) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => $exception->getMessage() !== '' ? $exception->getMessage() : 'Request failed.',
+                    'errors' => null,
+                    'data' => null,
+                ], $exception->getStatusCode());
+            }
+
+            return response()->json([
+                'status' => 'error',
+                'message' => config('app.debug') ? $exception->getMessage() : 'An unexpected error occurred.',
+                'errors' => null,
+                'data' => null,
+            ], 500);
+        });
     })->create();
