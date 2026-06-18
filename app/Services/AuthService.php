@@ -3,8 +3,8 @@
 namespace App\Services;
 
 use App\Models\User;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\ValidationException;
 
 class AuthService
 {
@@ -31,9 +31,7 @@ class AuthService
         $user = $this->userService->findForLogin($input);
 
         if ($user === null || ! Hash::check($input['password'], $user->password)) {
-            throw ValidationException::withMessages([
-                'email' => ['The provided credentials are incorrect.'],
-            ]);
+            throw new AuthenticationException( 'The provided credentials are incorrect.' );
         }
 
         $refreshToken = $this->refreshTokenService->issue($user);
@@ -44,12 +42,6 @@ class AuthService
     public function refreshToken(string $refreshToken): array
     {
         $result = $this->refreshTokenService->rotate($refreshToken);
-
-        if ($result === null) {
-            throw ValidationException::withMessages([
-                'refresh_token' => ['The refresh token is invalid or expired.'],
-            ]);
-        }
 
         return $this->createAuthTokens($result['user'], $result['plain_token']);
     }

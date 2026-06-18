@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\RefreshToken;
 use App\Models\User;
 use App\Repositories\Interfaces\RefreshTokenRepositoryInterface;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Support\Carbon;
 
 class RefreshTokenService
@@ -41,12 +42,12 @@ class RefreshTokenService
         $this->refreshTokenRepository->revoke($id);
     }
 
-    public function rotate(string $plainToken): ?array
+    public function rotate(string $plainToken): array
     {
         $refreshToken = $this->findActive($plainToken);
 
         if ($refreshToken === null) {
-            return null;
+            throw new AuthenticationException('The refresh token is invalid or expired.');
         }
 
         $user = $refreshToken->user;
