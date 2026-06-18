@@ -1,11 +1,13 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "laravel/laravel",
+    "name": "laravel/short-url",
+    "version": "1.0.0",
     "type": "project",
-    "description": "The skeleton application for the Laravel framework.",
+    "description": "Short URL application for Laravel framework.",
     "keywords": [
         "laravel",
-        "framework"
+        "framework",
+        "short-url"
     ],
     "license": "MIT",
     "require": {
