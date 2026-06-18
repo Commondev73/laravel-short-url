@@ -17,7 +17,6 @@ Route::prefix('short-urls')->group(function (): void {
     Route::middleware('auth:api')->group(function (): void {
         Route::get('/', [ShortUrlController::class, 'index']);
         Route::post('/', [ShortUrlController::class, 'store']);
-        Route::put('/{id}', [ShortUrlController::class, 'update']);
-        Route::delete('/{id}', [ShortUrlController::class, 'destroy']);
+        Route::patch('/{id}', [ShortUrlController::class, 'update']);
     });
 });

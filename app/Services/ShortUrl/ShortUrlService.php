@@ -65,6 +65,13 @@ class ShortUrlService
         return $shortUrl;
     }
 
+    public function paginate(int $perPage = 15, ?int $userId = null): LengthAwarePaginator
+    {
+        $perPage = max(1, min($perPage, 100));
+
+        return $this->shortUrlRepository->paginate($perPage, $userId);
+    }
+
     public function paginateByUserId(int $userId, int $perPage = 15): LengthAwarePaginator
     {
         $perPage = max(1, min($perPage, 100));
@@ -72,13 +79,20 @@ class ShortUrlService
         return $this->shortUrlRepository->paginateByUserId($userId, $perPage);
     }
 
-    public function update(int $id, int $userId, array $input): ShortUrl
+    public function updateById(int $id, array $input): ShortUrl
     {
-        $shortUrl = $this->shortUrlRepository->findById($id);
+        $this->findById($id);
 
-        if ($shortUrl === null) {
-            throw new NotFoundHttpException('Short URL not found.');
-        }
+        $updated = $this->shortUrlRepository->update($id, $input);
+
+        $this->cache->forget($updated);
+
+        return $updated;
+    }
+
+    public function updateByIdAndUserId(int $id, int $userId, array $input): ShortUrl
+    {
+        $shortUrl = $this->findById($id);
 
         if ($shortUrl->user_id !== $userId) {
             throw new UnauthorizedException('You are not authorized to update this short URL.');
@@ -98,6 +112,28 @@ class ShortUrlService
         $this->cache->set($shortUrl);
     }
 
+    public function deleteById(int $id): void
+    {
+        $shortUrl = $this->findById($id);
+
+        $this->cache->forget($shortUrl);
+
+        $this->shortUrlRepository->delete($id);
+    }
+
+    public function deleteByIdAndUserId(int $id, int $userId): void
+    {
+        $shortUrl = $this->findById($id);
+
+        if ($shortUrl->user_id !== $userId) {
+            throw new UnauthorizedException('You are not authorized to delete this short URL.');
+        }
+
+        $this->cache->forget($shortUrl);
+
+        $this->shortUrlRepository->delete($id);
+    }
+    
     private function generateUniqueShortCode(): string
     {
         for ($count = 0; $count < self::MAX_GENERATION_COUNT; $count++) {
