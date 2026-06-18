@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ShortUrl\StoreShortUrlRequest;
 use App\Http\Requests\ShortUrl\UpdateShortUrlRequest;
+use App\Jobs\RecordShortUrlClick;
 use App\Services\ShortUrl\ShortUrlService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -45,6 +46,8 @@ class ShortUrlController extends Controller
     public function redirect(string $shortCode): RedirectResponse
     {
         $shortUrl = $this->shortUrlService->findByShortCode($shortCode);
+
+        RecordShortUrlClick::dispatch($shortUrl->id);
 
         return redirect()->away($shortUrl->original_url);
     }
