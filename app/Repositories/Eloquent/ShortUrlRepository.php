@@ -35,11 +35,13 @@ class ShortUrlRepository implements ShortUrlRepositoryInterface
             ->paginate($perPage);
     }
 
-    public function incrementClickCount(int $id): void
+    public function incrementClickCount(int $id): ShortUrl
     {
-        ShortUrl::query()
-            ->where('id', $id)
-            ->increment('click_count');
+        $shortUrl = ShortUrl::findOrFail($id);
+        
+        $shortUrl->increment('click_count');
+
+        return $shortUrl;
     }
 
     public function update(int $id, array $data): ShortUrl

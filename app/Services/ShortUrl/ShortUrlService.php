@@ -93,7 +93,9 @@ class ShortUrlService
 
     public function clickCount(int $id): void
     {
-        $this->shortUrlRepository->incrementClickCount($id);
+        $shortUrl = $this->shortUrlRepository->incrementClickCount($id);
+
+        $this->cache->set($shortUrl);
     }
 
     private function generateUniqueShortCode(): string

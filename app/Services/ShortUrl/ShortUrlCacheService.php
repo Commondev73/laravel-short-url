@@ -8,7 +8,7 @@ use Closure;
 
 class ShortUrlCacheService
 {
-    private const TTL_SECONDS = 3600;
+    private const TTL_SECONDS = 86400;
 
     private const KEY_PREFIX_CODE = 'short_url:code:';
 
@@ -20,10 +20,9 @@ class ShortUrlCacheService
 
     public function rememberByShortCode(string $shortCode, Closure $callback): ?ShortUrl
     {
-        $TTL = 86400; // 24 hours
         return $this->cache->remember(
             self::KEY_PREFIX_CODE . $shortCode,
-            $TTL,
+            self::TTL_SECONDS,
             $callback
         );
     }
@@ -35,6 +34,12 @@ class ShortUrlCacheService
             self::TTL_SECONDS,
             $callback
         );
+    }
+
+    public function set(ShortUrl $shortUrl): void
+    {
+        $this->cache->set(self::KEY_PREFIX_CODE . $shortUrl->short_code, $shortUrl, self::TTL_SECONDS);
+        $this->cache->set(self::KEY_PREFIX_ID . $shortUrl->id, $shortUrl, self::TTL_SECONDS);
     }
 
     public function forget(ShortUrl $shortUrl): void

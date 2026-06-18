@@ -15,7 +15,7 @@ interface ShortUrlRepositoryInterface
 
     public function paginateByUserId(int $userId, int $perPage = 15): LengthAwarePaginator;
 
-    public function incrementClickCount(int $id): void;
+    public function incrementClickCount(int $id): ShortUrl;
 
     public function update(int $id, array $data): ShortUrl;
 }
