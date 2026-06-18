@@ -36,14 +36,35 @@ class AuthService
             ]);
         }
 
+        $refreshToken = $this->refreshTokenService->issue($user);
+
+        return $this->createAuthTokens($user, $refreshToken);
+    }
+
+    public function refreshToken(string $refreshToken): array
+    {
+        $result = $this->refreshTokenService->rotate($refreshToken);
+
+        if ($result === null) {
+            throw ValidationException::withMessages([
+                'refresh_token' => ['The refresh token is invalid or expired.'],
+            ]);
+        }
+
+        return $this->createAuthTokens($result['user'], $result['plain_token']);
+    }
+
+    private function createAuthTokens(User $user, string $refreshToken): array
+    {
         $accessToken = auth('api')->login($user);
+        $expiresIn = auth('api')->factory()->getTTL() * 60;
 
         return [
             'user' => $user,
             'access_token' => $accessToken,
-            'refresh_token' => $this->refreshTokenService->issue($user),
+            'refresh_token' => $refreshToken,
             'token_type' => 'Bearer',
-            'expires_in' => auth('api')->factory()->getTTL() * 60,
+            'expires_in' => $expiresIn,
         ];
     }
 }
