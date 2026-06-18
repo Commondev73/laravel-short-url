@@ -18,29 +18,20 @@ class AuthController extends Controller
     {
         $user = $this->authService->register($request->validated());
 
-        return response()->json([
-            'message' => 'Register successfully.',
-            'data' => $user,
-        ], 201);
+        return $this->created($user, 'Register successfully.');
     }
 
     public function login(LoginRequest $request): JsonResponse
     {
         $results = $this->authService->login($request->validated());
 
-        return response()->json([
-            'message' => 'Login successfully.',
-            'data' => $results,
-        ]);
+        return $this->success($results, 'Login successfully.');
     }
 
     public function refreshToken(RefreshTokenRequest $request): JsonResponse
     {
         $results = $this->authService->refreshToken($request->validated('refresh_token'));
 
-        return response()->json([
-            'message' => 'Token refreshed successfully.',
-            'data' => $results,
-        ]);
+        return $this->success($results, 'Token refreshed successfully.');
     }
 }
