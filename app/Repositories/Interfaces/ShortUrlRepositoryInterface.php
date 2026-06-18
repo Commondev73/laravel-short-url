@@ -17,5 +17,5 @@ interface ShortUrlRepositoryInterface
 
     public function incrementClickCount(int $id): void;
 
-    public function update(int $id, array $data): bool;
+    public function update(int $id, array $data): ?ShortUrl;
 }

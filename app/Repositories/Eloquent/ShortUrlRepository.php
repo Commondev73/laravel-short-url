@@ -42,10 +42,12 @@ class ShortUrlRepository implements ShortUrlRepositoryInterface
             ->increment('click_count');
     }
 
-    public function update(int $id, array $data): bool
+    public function update(int $id, array $data): ShortUrl
     {
-        return (bool) ShortUrl::query()
-            ->where('id', $id)
-            ->update($data);
+        $shortUrl = ShortUrl::findOrFail($id);
+
+        $shortUrl->update($data);
+
+        return $shortUrl;
     }
 }
