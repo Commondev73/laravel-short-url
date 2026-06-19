@@ -38,9 +38,17 @@ class ShortUrlController extends Controller
     public function update(UpdateShortUrlRequest $request, int $id): JsonResponse
     {
         $userId = (int) auth('api')->id();
-        $shortUrl = $this->shortUrlService->update($id, $userId, $request->validated());
+        $shortUrl = $this->shortUrlService->updateByIdAndUserId($id, $userId, $request->validated());
 
         return $this->success($shortUrl, 'Short URL updated successfully.');
+    }
+
+    public function destroy(int $id): JsonResponse
+    {
+        $userId = (int) auth('api')->id();
+        $this->shortUrlService->deleteByIdAndUserId($id, $userId);
+
+        return $this->success(null, 'Short URL deleted successfully.');
     }
 
     public function redirect(string $shortCode): RedirectResponse
