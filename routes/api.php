@@ -12,6 +12,7 @@ Route::prefix('auth')->group(function (): void {
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/refresh', [AuthController::class, 'refreshToken']);
 
+    // Auth routes
     Route::middleware('auth:api')->group(function (): void {
         Route::get('/me', [AuthController::class, 'me']);
         Route::post('/logout', [AuthController::class, 'logout']);
@@ -34,8 +35,8 @@ Route::prefix('short-urls')->group(function (): void {
     Route::middleware('auth:api')->group(function (): void {
         Route::get('/', [ShortUrlController::class, 'index']);
         Route::post('/', [ShortUrlController::class, 'store']);
-        Route::get('/{id}', [ShortUrlController::class, 'show']);
         Route::put('/{id}', [ShortUrlController::class, 'update']);
         Route::delete('/{id}', [ShortUrlController::class, 'destroy']);
+        Route::get('/info/{id}', [ShortUrlController::class, 'show']);
     });
 });
