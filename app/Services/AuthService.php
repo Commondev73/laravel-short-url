@@ -26,6 +26,19 @@ class AuthService
         return $this->userService->create($data);
     }
 
+    public function registerAdmin(array $input): User
+    {
+        $data = [
+            'name' => $input['name'],
+            'email' => $input['email'],
+            'username' => $input['username'] ?? null,
+            'password' => $input['password'],
+            'role' => User::ROLE_ADMIN,
+        ];
+
+        return $this->userService->create($data);
+    }
+
     public function login(array $input): array
     {
         $user = $this->userService->findForLogin($input);
