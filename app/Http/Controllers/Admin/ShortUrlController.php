@@ -17,9 +17,9 @@ class ShortUrlController extends Controller
     public function index(Request $request): JsonResponse
     {
         $perPage = $request->integer('per_page', 15);
-        $userId = $request->filled('user_id') ? $request->integer('user_id') : null;
+        $page = $request->integer('page', 1);
 
-        $shortUrls = $this->shortUrlService->paginate($perPage, $userId);
+        $shortUrls = $this->shortUrlService->paginate($perPage, $page);
 
         return $this->paginated($shortUrls, 'Short URLs fetched successfully.');
     }

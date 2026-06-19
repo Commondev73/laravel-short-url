@@ -76,18 +76,20 @@ class ShortUrlService
         return $shortUrl;
     }
 
-    public function paginate(int $perPage = 15, ?int $userId = null): LengthAwarePaginator
+    public function paginate(int $perPage = 15, int $page = 1): LengthAwarePaginator
     {
         $perPage = max(1, min($perPage, 100));
+        $page = max(1, $page);
 
-        return $this->shortUrlRepository->paginate($perPage, $userId);
+        return $this->shortUrlRepository->paginate($perPage, $page);
     }
 
-    public function paginateByUserId(int $userId, int $perPage = 15): LengthAwarePaginator
+    public function paginateByUserId(int $userId, int $perPage = 15, int $page = 1): LengthAwarePaginator
     {
         $perPage = max(1, min($perPage, 100));
+        $page = max(1, $page);
 
-        return $this->shortUrlRepository->paginateByUserId($userId, $perPage);
+        return $this->shortUrlRepository->paginateByUserId($userId, $perPage, $page);
     }
 
     public function updateById(int $id, array $input): ShortUrl

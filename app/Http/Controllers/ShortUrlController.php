@@ -21,8 +21,9 @@ class ShortUrlController extends Controller
     {
         $userId = (int) auth('api')->id();
         $perPage = $request->integer('per_page', 15);
+        $page = $request->integer('page', 1);
 
-        $shortUrls = $this->shortUrlService->paginateByUserId($userId, $perPage);
+        $shortUrls = $this->shortUrlService->paginateByUserId($userId, $perPage, $page);
 
         return $this->paginated($shortUrls, 'Short URLs fetched successfully.');
     }

@@ -13,9 +13,9 @@ interface ShortUrlRepositoryInterface
 
     public function findByShortCode(string $shortCode): ?ShortUrl;
 
-    public function paginateByUserId(int $userId, int $perPage = 15): LengthAwarePaginator;
+    public function paginateByUserId(int $userId, int $perPage = 15, int $page = 1): LengthAwarePaginator;
 
-    public function paginate(int $perPage = 15, ?int $userId = null): LengthAwarePaginator;
+    public function paginate(int $perPage = 15, int $page = 1): LengthAwarePaginator;
 
     public function incrementClickCount(int $id): ShortUrl;
 
