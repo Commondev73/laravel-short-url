@@ -28,6 +28,13 @@ class AuthController extends Controller
         return $this->success($results, 'Login successfully.');
     }
 
+    public function logout(RefreshTokenRequest $request): JsonResponse
+    {
+        $this->authService->logout($request->validated('refresh_token'));
+
+        return $this->success(null, 'Logged out successfully.');
+    }
+
     public function refreshToken(RefreshTokenRequest $request): JsonResponse
     {
         $results = $this->authService->refreshToken($request->validated('refresh_token'));

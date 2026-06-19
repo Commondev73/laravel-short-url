@@ -11,6 +11,10 @@ Route::prefix('auth')->group(function (): void {
     Route::post('/admin-register', [AdminAuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/refresh', [AuthController::class, 'refreshToken']);
+    
+    Route::middleware('auth:api')->group(function (): void {
+        Route::post('/logout', [AuthController::class, 'logout']);
+    });
 });
 
 Route::prefix('admin')->middleware(['auth:api', 'admin'])->group(function (): void {

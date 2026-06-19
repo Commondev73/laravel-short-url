@@ -52,6 +52,17 @@ class AuthService
         return $this->createAuthTokens($user, $refreshToken);
     }
 
+    public function logout(string $refreshToken): void
+    {
+        $token = $this->refreshTokenService->findActive($refreshToken);
+
+        if ($token !== null) {
+            $this->refreshTokenService->revoke($token->id);
+        }
+
+        auth('api')->logout();
+    }
+
     public function refreshToken(string $refreshToken): array
     {
         $result = $this->refreshTokenService->rotate($refreshToken);
