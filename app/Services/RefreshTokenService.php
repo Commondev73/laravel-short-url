@@ -30,11 +30,17 @@ class RefreshTokenService
         return $plainToken;
     }
 
-    public function findActive(string $plainToken): ?RefreshToken
+    public function findActive(string $plainToken): RefreshToken
     {
         $tokenHash = $this->hashToken($plainToken);
 
-        return $this->refreshTokenRepository->findActiveByTokenHash($tokenHash);
+        $token = $this->refreshTokenRepository->findActiveByTokenHash($tokenHash);
+
+        if ($token === null) {
+            throw new AuthenticationException('The refresh token is invalid or expired.');
+        }
+
+        return $token;
     }
 
     public function revoke(int $id): void
@@ -45,10 +51,6 @@ class RefreshTokenService
     public function rotate(string $plainToken): array
     {
         $refreshToken = $this->findActive($plainToken);
-
-        if ($refreshToken === null) {
-            throw new AuthenticationException('The refresh token is invalid or expired.');
-        }
 
         $user = $refreshToken->user;
         $this->revoke($refreshToken->id);
