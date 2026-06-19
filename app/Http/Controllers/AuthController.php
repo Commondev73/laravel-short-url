@@ -41,4 +41,12 @@ class AuthController extends Controller
 
         return $this->success($results, 'Token refreshed successfully.');
     }
+
+    public function me(): JsonResponse
+    {
+        $userId = (int) auth('api')->id();
+        $user = $this->authService->me($userId);
+
+        return $this->success($user, 'User information fetched successfully.');
+    }
 }

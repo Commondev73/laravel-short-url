@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\User;
+use App\Services\User\UserService;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Support\Facades\Hash;
 
@@ -68,6 +69,11 @@ class AuthService
         $result = $this->refreshTokenService->rotate($refreshToken);
 
         return $this->createAuthTokens($result['user'], $result['plain_token']);
+    }
+
+    public function me(int $userId): User
+    {
+        return $this->userService->findById($userId);
     }
 
     private function createAuthTokens(User $user, string $refreshToken): array

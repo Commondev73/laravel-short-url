@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\User;
 
 use App\Models\User;
 use App\Repositories\Interfaces\UserRepositoryInterface;
@@ -9,7 +9,8 @@ use Illuminate\Support\Facades\Hash;
 class UserService
 {
     public function __construct(
-        private UserRepositoryInterface $userRepository
+        private UserRepositoryInterface $userRepository,
+        private UserCacheService $cache
     ) {}
 
     public function create(array $input): User
@@ -19,6 +20,20 @@ class UserService
         }
 
         return $this->userRepository->create($input);
+    }
+
+    public function findById(int $id): User
+    {
+        $user = $this->cache->rememberById(
+            $id,
+            fn () => $this->userRepository->findById($id)?->toArray()
+        );
+
+        if ($user === null) {
+            throw new NotFoundHttpException('User not found.');
+        }
+
+        return $user;
     }
 
     public function findForLogin(array $credentials): ?User

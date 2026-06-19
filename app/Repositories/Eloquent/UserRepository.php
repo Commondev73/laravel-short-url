@@ -12,6 +12,13 @@ class UserRepository implements UserRepositoryInterface
         return User::create($data);
     }
 
+    public function findById(int $id): ?User
+    {
+        return User::query()
+            ->where('id', $id)
+            ->first();
+    }
+
     public function findEmail(string $email): ?User
     {
         return User::query()

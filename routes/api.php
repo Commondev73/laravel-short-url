@@ -13,6 +13,7 @@ Route::prefix('auth')->group(function (): void {
     Route::post('/refresh', [AuthController::class, 'refreshToken']);
 
     Route::middleware('auth:api')->group(function (): void {
+        Route::get('/me', [AuthController::class, 'me']);
         Route::post('/logout', [AuthController::class, 'logout']);
     });
 });
