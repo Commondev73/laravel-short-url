@@ -24,6 +24,13 @@ class ShortUrlController extends Controller
         return $this->paginated($shortUrls, 'Short URLs fetched successfully.');
     }
 
+    public function show(int $id): JsonResponse
+    {
+        $shortUrl = $this->shortUrlService->findById($id);
+
+        return $this->success($shortUrl, 'Short URL fetched successfully.');
+    }
+
     public function update(UpdateShortUrlRequest $request, int $id): JsonResponse
     {
         $shortUrl = $this->shortUrlService->updateById($id, $request->validated());

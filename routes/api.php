@@ -11,7 +11,7 @@ Route::prefix('auth')->group(function (): void {
     Route::post('/admin-register', [AdminAuthController::class, 'register']);
     Route::post('/login', [AuthController::class, 'login']);
     Route::post('/refresh', [AuthController::class, 'refreshToken']);
-    
+
     Route::middleware('auth:api')->group(function (): void {
         Route::post('/logout', [AuthController::class, 'logout']);
     });
@@ -20,6 +20,7 @@ Route::prefix('auth')->group(function (): void {
 Route::prefix('admin')->middleware(['auth:api', 'admin'])->group(function (): void {
     Route::prefix('short-urls')->group(function (): void {
         Route::get('/', [AdminShortUrlController::class, 'index']);
+        Route::get('/{id}', [AdminShortUrlController::class, 'show']);
         Route::put('/{id}', [AdminShortUrlController::class, 'update']);
         Route::delete('/{id}', [AdminShortUrlController::class, 'destroy']);
     });
@@ -32,6 +33,7 @@ Route::prefix('short-urls')->group(function (): void {
     Route::middleware('auth:api')->group(function (): void {
         Route::get('/', [ShortUrlController::class, 'index']);
         Route::post('/', [ShortUrlController::class, 'store']);
+        Route::get('/{id}', [ShortUrlController::class, 'show']);
         Route::put('/{id}', [ShortUrlController::class, 'update']);
         Route::delete('/{id}', [ShortUrlController::class, 'destroy']);
     });

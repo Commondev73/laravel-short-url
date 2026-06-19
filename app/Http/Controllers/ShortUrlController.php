@@ -35,6 +35,14 @@ class ShortUrlController extends Controller
         return $this->created($shortUrl, 'Short URL created successfully.');
     }
 
+    public function show(int $id): JsonResponse
+    {
+        $userId = (int) auth('api')->id();
+        $shortUrl = $this->shortUrlService->findByIdAndUserId($id, $userId);
+
+        return $this->success($shortUrl, 'Short URL fetched successfully.');
+    }
+
     public function update(UpdateShortUrlRequest $request, int $id): JsonResponse
     {
         $userId = (int) auth('api')->id();

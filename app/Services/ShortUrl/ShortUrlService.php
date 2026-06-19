@@ -51,6 +51,17 @@ class ShortUrlService
         return $shortUrl;
     }
 
+    public function findByIdAndUserId(int $id, int $userId): ShortUrl
+    {
+        $shortUrl = $this->findById($id);
+
+        if ($shortUrl->user_id !== $userId) {
+            throw new UnauthorizedException('You are not authorized to view this short URL.');
+        }
+
+        return $shortUrl;
+    }
+
     public function findByShortCode(string $shortCode): ShortUrl
     {
         $shortUrl = $this->cache->rememberByShortCode(
