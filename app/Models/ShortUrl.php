@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Carbon;
@@ -18,6 +19,8 @@ use Illuminate\Support\Carbon;
 ])]
 class ShortUrl extends Model
 {
+    protected $appends = ['short_url'];
+
     protected function casts(): array
     {
         return [
@@ -27,11 +30,20 @@ class ShortUrl extends Model
         ];
     }
 
+    protected function shortUrl(): Attribute
+    {
+        return Attribute::make(
+            get: fn () => $this->short_code !== null
+                ? url("/api/short-urls/{$this->short_code}")
+                : null,
+        );
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
-
+    
     public function isExpired(): bool
     {
         $expiresAt = $this->expires_at;
