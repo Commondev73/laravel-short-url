@@ -16,8 +16,9 @@ class RefreshTokenRepository implements RefreshTokenRepositoryInterface
     {
         return RefreshToken::query()
             ->where('token_hash', $tokenHash)
-            ->active()
-            ->first();
+            ->whereNull('revoked_at')
+            ->where('expires_at', '>', now())
+            ->first();    
     }
 
     public function revoke(int $id): void
