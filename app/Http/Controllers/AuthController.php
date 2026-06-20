@@ -28,10 +28,25 @@ class AuthController extends Controller
         return $this->success($results, 'Login successfully.');
     }
 
+    public function logout(RefreshTokenRequest $request): JsonResponse
+    {
+        $this->authService->logout($request->validated('refresh_token'));
+
+        return $this->success(null, 'Logged out successfully.');
+    }
+
     public function refreshToken(RefreshTokenRequest $request): JsonResponse
     {
         $results = $this->authService->refreshToken($request->validated('refresh_token'));
 
         return $this->success($results, 'Token refreshed successfully.');
+    }
+
+    public function me(): JsonResponse
+    {
+        $userId = (int) auth('api')->id();
+        $user = $this->authService->me($userId);
+
+        return $this->success($user, 'User information fetched successfully.');
     }
 }

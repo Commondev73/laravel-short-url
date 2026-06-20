@@ -27,12 +27,26 @@ class ShortUrlRepository implements ShortUrlRepositoryInterface
             ->first();
     }
 
-    public function paginateByUserId(int $userId, int $perPage = 15): LengthAwarePaginator
+    public function paginateByUserId(int $userId, int $perPage = 15, int $page = 1): LengthAwarePaginator
     {
+        $columns = ['*'];
+        $pageName = 'page';
+        
         return ShortUrl::query()
             ->where('user_id', $userId)
             ->latest()
-            ->paginate($perPage);
+            ->paginate($perPage, $columns, $pageName, $page);
+    }
+
+    public function paginate(int $perPage = 15, int $page = 1): LengthAwarePaginator
+    {
+        $columns = ['*'];
+        $pageName = 'page';
+
+        return ShortUrl::query()
+            ->with('user')
+            ->latest()
+            ->paginate($perPage, $columns, $pageName, $page);
     }
 
     public function incrementClickCount(int $id): ShortUrl
@@ -51,5 +65,10 @@ class ShortUrlRepository implements ShortUrlRepositoryInterface
         $shortUrl->update($data);
 
         return $shortUrl;
+    }
+
+    public function delete(int $id): void
+    {
+        ShortUrl::findOrFail($id)->delete();
     }
 }

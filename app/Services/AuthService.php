@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\User;
+use App\Services\User\UserService;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Support\Facades\Hash;
 
@@ -26,6 +27,19 @@ class AuthService
         return $this->userService->create($data);
     }
 
+    public function registerAdmin(array $input): User
+    {
+        $data = [
+            'name' => $input['name'],
+            'email' => $input['email'],
+            'username' => $input['username'] ?? null,
+            'password' => $input['password'],
+            'role' => User::ROLE_ADMIN,
+        ];
+
+        return $this->userService->create($data);
+    }
+
     public function login(array $input): array
     {
         $user = $this->userService->findForLogin($input);
@@ -39,11 +53,27 @@ class AuthService
         return $this->createAuthTokens($user, $refreshToken);
     }
 
+    public function logout(string $refreshToken): void
+    {
+        $token = $this->refreshTokenService->findActive($refreshToken);
+
+        if ($token !== null) {
+            $this->refreshTokenService->revoke($token->id);
+        }
+
+        auth('api')->logout();
+    }
+
     public function refreshToken(string $refreshToken): array
     {
         $result = $this->refreshTokenService->rotate($refreshToken);
 
         return $this->createAuthTokens($result['user'], $result['plain_token']);
+    }
+
+    public function me(int $userId): User
+    {
+        return $this->userService->findById($userId);
     }
 
     private function createAuthTokens(User $user, string $refreshToken): array

@@ -51,6 +51,17 @@ class ShortUrlService
         return $shortUrl;
     }
 
+    public function findByIdAndUserId(int $id, int $userId): ShortUrl
+    {
+        $shortUrl = $this->findById($id);
+
+        if ($shortUrl->user_id !== $userId) {
+            throw new UnauthorizedException('You are not authorized to view this short URL.');
+        }
+
+        return $shortUrl;
+    }
+
     public function findByShortCode(string $shortCode): ShortUrl
     {
         $shortUrl = $this->cache->rememberByShortCode(
@@ -65,20 +76,36 @@ class ShortUrlService
         return $shortUrl;
     }
 
-    public function paginateByUserId(int $userId, int $perPage = 15): LengthAwarePaginator
+    public function paginate(int $perPage = 15, int $page = 1): LengthAwarePaginator
     {
         $perPage = max(1, min($perPage, 100));
+        $page = max(1, $page);
 
-        return $this->shortUrlRepository->paginateByUserId($userId, $perPage);
+        return $this->shortUrlRepository->paginate($perPage, $page);
     }
 
-    public function update(int $id, int $userId, array $input): ShortUrl
+    public function paginateByUserId(int $userId, int $perPage = 15, int $page = 1): LengthAwarePaginator
     {
-        $shortUrl = $this->shortUrlRepository->findById($id);
+        $perPage = max(1, min($perPage, 100));
+        $page = max(1, $page);
 
-        if ($shortUrl === null) {
-            throw new NotFoundHttpException('Short URL not found.');
-        }
+        return $this->shortUrlRepository->paginateByUserId($userId, $perPage, $page);
+    }
+
+    public function updateById(int $id, array $input): ShortUrl
+    {
+        $this->findById($id);
+
+        $updated = $this->shortUrlRepository->update($id, $input);
+
+        $this->cache->forget($updated);
+
+        return $updated;
+    }
+
+    public function updateByIdAndUserId(int $id, int $userId, array $input): ShortUrl
+    {
+        $shortUrl = $this->findById($id);
 
         if ($shortUrl->user_id !== $userId) {
             throw new UnauthorizedException('You are not authorized to update this short URL.');
@@ -98,6 +125,28 @@ class ShortUrlService
         $this->cache->set($shortUrl);
     }
 
+    public function deleteById(int $id): void
+    {
+        $shortUrl = $this->findById($id);
+
+        $this->cache->forget($shortUrl);
+
+        $this->shortUrlRepository->delete($id);
+    }
+
+    public function deleteByIdAndUserId(int $id, int $userId): void
+    {
+        $shortUrl = $this->findById($id);
+
+        if ($shortUrl->user_id !== $userId) {
+            throw new UnauthorizedException('You are not authorized to delete this short URL.');
+        }
+
+        $this->cache->forget($shortUrl);
+
+        $this->shortUrlRepository->delete($id);
+    }
+    
     private function generateUniqueShortCode(): string
     {
         for ($count = 0; $count < self::MAX_GENERATION_COUNT; $count++) {
